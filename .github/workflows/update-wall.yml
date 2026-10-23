@@ -1,0 +1,79 @@
+name: Update portrait wall
+
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"   # every 15 minutes (off the hour, when GitHub is less busy)
+  workflow_dispatch: {}              # "Run workflow" button for an immediate update
+
+permissions:
+  contents: write    # commit state/ (roster + encrypted Twitch token) when it changes
+  pages: write       # publish docs/ to GitHub Pages
+  id-token: write
+
+concurrency:
+  group: portrait-wall
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Fonts for names in other scripts (cached)
+        uses: actions/cache@v4
+        with:
+          path: fonts/cjk
+          key: noto-cjk-v1
+      - run: |
+          mkdir -p fonts/cjk
+          [ -f fonts/cjk/NotoSansCJK-Bold.ttc ] || curl -sSL -o fonts/cjk/NotoSansCJK-Bold.ttc https://github.com/notofonts/noto-cjk/raw/main/Sans/OTC/NotoSansCJK-Bold.ttc
+
+      - name: Profile picture cache
+        uses: actions/cache@v4
+        with:
+          path: .cache
+          key: pictures-${{ github.run_id }}
+          restore-keys: pictures-
+
+      - name: Collect sign-ups and build the sheets
+        env:
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_CHANNEL_ID: ${{ vars.DISCORD_CHANNEL_ID }}
+          DISCORD_MESSAGE_ID: ${{ vars.DISCORD_MESSAGE_ID }}
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+          TWITCH_REFRESH_TOKEN: ${{ secrets.TWITCH_REFRESH_TOKEN }}
+          TWITCH_STATE_KEY: ${{ secrets.TWITCH_STATE_KEY }}
+        run: python build.py
+
+      - name: Save state if it changed
+        run: |
+          git config user.name "foxfire-wall-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state
+          git diff --cached --quiet || git commit -m "wall: update roster" && git push
+
+      - name: Publish only when the sheets changed
+        id: changed
+        run: echo "changed=$(cat .publish)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/configure-pages@v5
+        if: steps.changed.outputs.changed == 'yes'
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.changed.outputs.changed == 'yes'
+        with:
+          path: docs
+      - id: deploy
+        if: steps.changed.outputs.changed == 'yes'
+        uses: actions/deploy-pages@v4

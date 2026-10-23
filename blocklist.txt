@@ -1,0 +1,2 @@
+# People who should never appear on the wall, one per line:
+#   discord:<user id>   twitch:<user id>   or an exact display name

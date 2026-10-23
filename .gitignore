@@ -1,0 +1,4 @@
+.cache/
+.publish
+fonts/cjk/
+__pycache__/
