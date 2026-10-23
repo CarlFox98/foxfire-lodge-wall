@@ -2,7 +2,7 @@
 
 The pictures on the portrait wall in **Foxfire Lodge** (a VRChat world by NeoTheFox). It's **opt-in only**:
 
-- **Discord:** react with 🦊 on the pinned sign-up message in the server's `#lodge-wall` channel. Remove your reaction to leave.
+- **Discord:** react with 🦊 on the pinned sign-up message in the server's `#🖼️lodge-wall🖼️` channel. Remove your reaction to leave.
 - **Twitch:** redeem the channel-points reward **"Put me on the Lodge wall"**. Redeem **"Take me off the Lodge wall"** to leave.
 
 Your profile picture and display name appear on the wall (and on the public images on this site) within about 15 minutes, and leaving takes effect just as fast. Want to be removed for good, or saw something that shouldn't be there? Message NeoTheFox.
@@ -27,7 +27,7 @@ Hallway order: people who joined in the last 7 days first, then everyone else in
 
 | Name | Kind | What |
 | --- | --- | --- |
-| `DISCORD_BOT_TOKEN` | secret | token of the "Foxfire Lodge Wall" Discord bot (needs View Channel + Read Message History in `#lodge-wall`) |
+| `DISCORD_BOT_TOKEN` | secret | token of the "Foxfire Lodge Wall" Discord bot (needs View Channel + Read Message History in `#🖼️lodge-wall🖼️`) |
 | `DISCORD_CHANNEL_ID` | variable | id of `#lodge-wall` |
 | `DISCORD_MESSAGE_ID` | variable | id of the pinned sign-up message |
 | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` | secrets | from the Twitch developer app (redirect URL `http://localhost:3000/`) |
