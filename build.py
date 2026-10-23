@@ -80,7 +80,12 @@ def twitch_session():
     if not rt:
         print("Twitch: no refresh token yet, skipped"); return None
     r = requests.post("https://id.twitch.tv/oauth2/token", data={"grant_type": "refresh_token", "refresh_token": rt, "client_id": cid, "client_secret": sec}, timeout=30)
-    r.raise_for_status(); t = r.json()
+    if not r.ok:  # Twitch's message names the problem (e.g. "Invalid refresh token", "invalid client secret") without echoing any secret
+        try: why = r.json().get("message", "")
+        except ValueError: why = r.text[:200]
+        print(f"::warning::Twitch sign-in failed ({r.status_code}: {why}). Twitch skipped this run; check the TWITCH_* secrets.")
+        return None
+    t = r.json()
     if t["refresh_token"] != rt or not enc.exists():  # only rewrite when it really changed (keeps the history quiet)
         STATE.mkdir(exist_ok=True); enc.write_bytes(f.encrypt(t["refresh_token"].encode()))
     h = {**UA, "Client-Id": cid, "Authorization": f"Bearer {t['access_token']}"}
