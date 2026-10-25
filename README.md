@@ -17,7 +17,7 @@ Your profile picture and display name appear on the wall (and on the public imag
 | `mosaic.png` | up to 240 faces, newest first (16 x 16 tiles of 128 px) |
 | `wall.json` | `{"count": …, "updated": "…"}` for the kiosk |
 
-The world downloads these at runtime (VRChat trusts `*.github.io`), so the wall updates without re-uploading the world. The layouts must match `M4HallwayBuilder.cs` in the world project.
+The world downloads these at runtime (VRChat trusts `*.github.io`), so the wall updates without re-uploading the world. These layouts are the contract for the world's portrait hallway, planned for milestone M4 (the world has only a hallway stub so far, `PF_PortraitHallway_Stub`); its builder must read them exactly as above.
 
 Hallway order: people who joined in the last 7 days first, then everyone else in a different random order each hour. The mosaic shows everyone (newest first, up to 240).
 
