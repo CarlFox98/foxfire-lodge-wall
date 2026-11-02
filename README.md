@@ -16,6 +16,7 @@ Your profile picture and display name appear on the wall (and on the public imag
 | `hallway.png` | 58 portraits (10 x 6 cells of 200 x 240 px from the top-left) and their names (8 x 12 strips of 256 x 48 px from y = 1440) |
 | `mosaic.png` | up to 240 faces, newest first (16 x 16 tiles of 128 px) |
 | `wall.json` | `{"count": …, "updated": "…"}` for the kiosk |
+| `barn-access.txt` | the rave barn's mods and DJs, copied from `access/barn-access.txt` (edit that file and push; the site updates within a few minutes) |
 
 The world downloads these at runtime (VRChat trusts `*.github.io`), so the wall updates without re-uploading the world. These layouts are the contract for the world's portrait hallway, planned for milestone M4 (the world has only a hallway stub so far, `PF_PortraitHallway_Stub`); its builder must read them exactly as above.
 

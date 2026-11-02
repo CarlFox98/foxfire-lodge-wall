@@ -1,0 +1,11 @@
+# Foxfire Lodge: who runs the barn.
+#   mods: can lock and unlock the barn's music and lights, and give or take DJ rights in-world.
+#   djs:  can play music and run the lights while the barn is locked.
+# One VRChat display name per line, exactly as it shows in VRChat (capitals don't matter).
+# Lines starting with # are ignored. The instance owner is always a mod.
+# Changes reach the world a few minutes after you push (the next time someone loads the world); no re-upload.
+
+mods:
+NeoTheFox98
+
+djs:

@@ -9,6 +9,7 @@ Outputs (layouts must match M4HallwayBuilder in the Unity project):
   docs/hallway.png  2048x2048: portraits 10x6 cells of 200x240 px from the top-left (58 used); names 8x12 strips of 256x48 px from y=1440
   docs/mosaic.png   2048x2048: 16x16 tiles of 128 px (240 used, newest first)
   docs/wall.json    {"count": n, "updated": "Oct 23, 2026"}
+  docs/barn-access.txt  copy of access/barn-access.txt (the barn's mods and DJs)
 Hallway order: anyone who joined in the last 7 days first (newest first), the rest shuffled once per hour.
 """
 import datetime as dt, hashlib, io, json, os, random, sys, time
@@ -245,6 +246,8 @@ def render(roster, now_dt, placeholder_fox=None):
 
     (DOCS / "wall.json").write_text(json.dumps({"count": len(people), "updated": now_dt.strftime("%b %d, %Y").replace(" 0", " ")}), "utf-8")
     (DOCS / ".nojekyll").write_text("")
+    acc = ROOT / "access" / "barn-access.txt"                     # the barn's mod / DJ list, read by the world at runtime
+    if acc.exists(): (DOCS / "barn-access.txt").write_text(acc.read_text("utf-8"), "utf-8")
     print(f"Rendered: {len(people)} on the wall, {len(hall)} in the hallway")
 
 
@@ -252,7 +255,8 @@ def publish_flag(now_dt):
     """Tells the workflow whether the sheets changed (deploy only then) and keeps the schedule alive:
     GitHub pauses scheduled workflows in public repos after 60 days without commits, so a heartbeat is committed monthly."""
     h = hashlib.sha256()
-    for n in ("hallway.png", "mosaic.png", "wall.json"): h.update((DOCS / n).read_bytes())
+    for n in ("hallway.png", "mosaic.png", "wall.json", "barn-access.txt"):
+        if (DOCS / n).exists(): h.update((DOCS / n).read_bytes())
     digest, last = h.hexdigest(), STATE / "published.sha"
     changed = not last.exists() or last.read_text().strip() != digest
     if changed: last.write_text(digest)

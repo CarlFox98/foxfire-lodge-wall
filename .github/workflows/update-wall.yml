@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: "7,22,37,52 * * * *"   # every 15 minutes (off the hour, when GitHub is less busy)
   workflow_dispatch: {}              # "Run workflow" button for an immediate update
+  push:
+    branches: [main]
+    paths: ["access/**"]               # a changed barn mod/DJ list goes live right away
 
 permissions:
   contents: write    # commit state/ (roster + encrypted Twitch token) when it changes
