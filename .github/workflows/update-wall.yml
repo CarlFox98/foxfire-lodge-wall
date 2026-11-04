@@ -2,7 +2,12 @@ name: Update portrait wall
 
 on:
   schedule:
-    - cron: "7,22,37,52 * * * *"   # every 15 minutes (off the hour, when GitHub is less busy)
+    # Hourly, off the hour. This used to ask for every 15 minutes, but GitHub throttles frequent
+    # schedules hard: measured 2026-11-04, the */15 cron actually ran 4-5 times a DAY, with gaps of
+    # 4-10 hours. Hourly is both more honest and more likely to be honoured. A sign-up that needs to
+    # show up now can use the "Run workflow" button, and a changed access/ list still publishes
+    # immediately through the push trigger below.
+    - cron: "17 * * * *"
   workflow_dispatch: {}              # "Run workflow" button for an immediate update
   push:
     branches: [main]
