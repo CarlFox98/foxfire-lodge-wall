@@ -1,6 +1,6 @@
 """Foxfire Lodge portrait wall: collects opt-ins, builds the two picture sheets and publishes them to docs/ (GitHub Pages).
 
-Runs every 15 minutes in GitHub Actions (see .github/workflows/update-wall.yml). Opt-in only:
+Runs in GitHub Actions (see .github/workflows/update-wall.yml for when). Opt-in only:
   * Discord: everyone who reacts with the fox emoji on the pinned sign-up message is on the wall; removing the reaction removes them.
   * Twitch:  redeeming the "Put me on the Lodge wall" channel-points reward adds you; "Take me off the Lodge wall" removes you.
 Anyone in blocklist.txt (one "discord:<id>" / "twitch:<id>" / name per line) never appears.
@@ -23,6 +23,7 @@ DOCS, STATE = ROOT / "docs", ROOT / "state"
 ROSTER = STATE / "roster.json"
 HALL_SLOTS, MOSAIC_SLOTS, NEW_DAYS = 58, 240, 7
 UA = {"User-Agent": "FoxfireLodgeWall/1.0 (+https://github.com/CarlFox98/foxfire-lodge-wall)"}
+SITE = os.environ.get("WALL_SITE", "https://carlfox98.github.io/foxfire-lodge-wall")
 FONT_DIRS = [ROOT / "fonts", Path("/usr/share/fonts")]
 
 
@@ -252,14 +253,21 @@ def render(roster, now_dt, placeholder_fox=None):
 
 
 def publish_flag(now_dt):
-    """Tells the workflow whether the sheets changed (deploy only then) and keeps the schedule alive:
-    GitHub pauses scheduled workflows in public repos after 60 days without commits, so a heartbeat is committed monthly."""
-    h = hashlib.sha256()
+    """Tells the workflow whether to deploy, by comparing the freshly built files with what the live site serves.
+    (It used to compare with a digest saved in state/ before the deploy ran, so a failed deploy left the site stale.)
+    Anything that can't be fetched counts as changed. Also keeps the schedule alive: GitHub pauses scheduled workflows
+    in public repos after 60 days without commits, so a heartbeat is committed monthly."""
+    changed = []
     for n in ("hallway.png", "mosaic.png", "wall.json", "barn-access.txt"):
-        if (DOCS / n).exists(): h.update((DOCS / n).read_bytes())
-    digest, last = h.hexdigest(), STATE / "published.sha"
-    changed = not last.exists() or last.read_text().strip() != digest
-    if changed: last.write_text(digest)
+        f = DOCS / n
+        if not f.exists(): continue
+        try:
+            r = requests.get(f"{SITE}/{n}", params={"v": int(time.time())}, headers=UA, timeout=20)
+            live = r.content if r.status_code == 200 else None
+        except requests.RequestException:
+            live = None
+        if live != f.read_bytes(): changed.append(n)
+    print(f"Live site differs in: {', '.join(changed) or 'nothing'}")
     (ROOT / ".publish").write_text("yes" if changed else "no")
     hb = STATE / "heartbeat.txt"
     if not hb.exists() or (now_dt - dt.datetime.fromisoformat(hb.read_text().strip())).days >= 30: hb.write_text(now_dt.isoformat())

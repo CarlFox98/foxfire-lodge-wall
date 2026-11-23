@@ -5,11 +5,11 @@ The pictures on the portrait wall in **Foxfire Lodge** (a VRChat world by NeoThe
 - **Discord:** react with 🦊 on the pinned sign-up message in the server's `#🖼️lodge-wall🖼️` channel. Remove your reaction to leave.
 - **Twitch:** redeem the channel-points reward **"Put me on the Lodge wall"**. Redeem **"Take me off the Lodge wall"** to leave.
 
-Your profile picture and display name appear on the wall (and on the public images on this site) within about 15 minutes, and leaving takes effect just as fast. Want to be removed for good, or saw something that shouldn't be there? Message NeoTheFox.
+Your profile picture and display name appear on the wall (and on the public images on this site) at the next update, usually within a few hours, and leaving takes effect just as fast. Want to be removed for good, or saw something that shouldn't be there? Message NeoTheFox.
 
 ## How it works
 
-`build.py` runs every 15 minutes in GitHub Actions (`.github/workflows/update-wall.yml`). It reads the Discord reactions and Twitch redemptions, downloads profile pictures, builds two 2048 px sheets and a small info file, and publishes them to GitHub Pages:
+`build.py` runs in GitHub Actions (`.github/workflows/update-wall.yml`): scheduled hourly, which GitHub actually honours about 3 to 4 times a day (measured over 100 runs, Nov 2026), plus the "Run workflow" button and any push to `access/`. It reads the Discord reactions and Twitch redemptions, downloads profile pictures, builds two 2048 px sheets and a small info file, and publishes them to GitHub Pages:
 
 | File | Contents |
 | --- | --- |
@@ -18,7 +18,7 @@ Your profile picture and display name appear on the wall (and on the public imag
 | `wall.json` | `{"count": …, "updated": "…"}` for the kiosk |
 | `barn-access.txt` | the rave barn's mods and DJs, copied from `access/barn-access.txt` (edit that file and push; the site updates within a few minutes) |
 
-The world downloads these at runtime (VRChat trusts `*.github.io`), so the wall updates without re-uploading the world. These layouts are the contract for the world's portrait hallway, planned for milestone M4 (the world has only a hallway stub so far, `PF_PortraitHallway_Stub`); its builder must read them exactly as above.
+The world downloads these at runtime (VRChat trusts `*.github.io`), so the wall updates without re-uploading the world. These layouts are the contract for the world's portrait hallway and den mosaic (shipped in M4); the world must read them exactly as above.
 
 Hallway order: people who joined in the last 7 days first, then everyone else in a different random order each hour. The mosaic shows everyone (newest first, up to 240).
 

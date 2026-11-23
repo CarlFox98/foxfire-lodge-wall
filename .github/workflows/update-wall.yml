@@ -7,6 +7,7 @@ on:
     # 4-10 hours. Hourly is both more honest and more likely to be honoured. A sign-up that needs to
     # show up now can use the "Run workflow" button, and a changed access/ list still publishes
     # immediately through the push trigger below.
+    # Re-measured 2026-11-22 over 100 runs: hourly is honoured only 3-4 times a day (gaps of 4-10 h).
     - cron: "17 * * * *"
   workflow_dispatch: {}              # "Run workflow" button for an immediate update
   push:
@@ -29,9 +30,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
@@ -39,7 +40,7 @@ jobs:
       - run: pip install -r requirements.txt
 
       - name: Fonts for names in other scripts (cached)
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: fonts/cjk
           key: noto-cjk-v1
@@ -48,7 +49,7 @@ jobs:
           [ -f fonts/cjk/NotoSansCJK-Bold.ttc ] || curl -sSL -o fonts/cjk/NotoSansCJK-Bold.ttc https://github.com/notofonts/noto-cjk/raw/main/Sans/OTC/NotoSansCJK-Bold.ttc
 
       - name: Profile picture cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .cache
           key: pictures-${{ github.run_id }}
@@ -70,18 +71,23 @@ jobs:
           git config user.name "foxfire-wall-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add state
-          git diff --cached --quiet || git commit -m "wall: update roster" && git push
+          if ! git diff --cached --quiet; then
+            git commit -m "wall: update roster"
+            git pull --rebase --quiet   # someone may have pushed access/ changes during the run
+            git push
+          fi
 
       - name: Publish only when the sheets changed
         id: changed
         run: echo "changed=$(cat .publish)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
         if: steps.changed.outputs.changed == 'yes'
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         if: steps.changed.outputs.changed == 'yes'
         with:
           path: docs
+          include-hidden-files: true   # keeps docs/.nojekyll (v4+ drops dotfiles by default)
       - id: deploy
         if: steps.changed.outputs.changed == 'yes'
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
